@@ -33,13 +33,29 @@ def get_vm_files(input_path):
     return [input_path]
 
 
+def need_bootstrap(input_path):
+
+    # no project 8, quando tem Sys.vm precisa iniciar com bootstrap
+
+    if os.path.isdir(input_path):
+
+        for file in os.listdir(input_path):
+
+            if file == "Sys.vm":
+                return True
+
+    return False
+
+
 def translate(input_path):
 
     output_file = get_output_file(input_path)
 
     vm_files = get_vm_files(input_path)
 
-    writer = CodeWriter(output_file)
+    bootstrap = need_bootstrap(input_path)
+
+    writer = CodeWriter(output_file, bootstrap)
 
     for vm_file in vm_files:
 
@@ -52,6 +68,56 @@ def translate(input_path):
         while parser.has_more_commands():
 
             parser.advance()
+
+            cmd_type = parser.command_type()
+
+            if cmd_type == "C_ARITHMETIC":
+
+                writer.write_arithmetic(parser.arg1())
+
+            elif cmd_type == "C_PUSH":
+
+                writer.write_push(
+                    parser.arg1(),
+                    parser.arg2()
+                )
+
+            elif cmd_type == "C_POP":
+
+                writer.write_pop(
+                    parser.arg1(),
+                    parser.arg2()
+                )
+
+            elif cmd_type == "C_LABEL":
+
+                writer.write_label(parser.arg1())
+
+            elif cmd_type == "C_GOTO":
+
+                writer.write_goto(parser.arg1())
+
+            elif cmd_type == "C_IF":
+
+                writer.write_if(parser.arg1())
+
+            elif cmd_type == "C_FUNCTION":
+
+                writer.write_function(
+                    parser.arg1(),
+                    parser.arg2()
+                )
+
+            elif cmd_type == "C_CALL":
+
+                writer.write_call(
+                    parser.arg1(),
+                    parser.arg2()
+                )
+
+            elif cmd_type == "C_RETURN":
+
+                writer.write_return()
 
     writer.close()
 
@@ -74,22 +140,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-                cmd_type = parser.command_type()
-
-            if cmd_type == "C_ARITHMETIC":
-
-                writer.write_arithmetic(parser.arg1())
-
-            elif cmd_type == "C_PUSH":
-
-                writer.write_push(
-                    parser.arg1(),
-                    parser.arg2()
-                )
-
-            elif cmd_type == "C_POP":
-
-                writer.write_pop(
-                    parser.arg1(),
-                    parser.arg2()
-                )
