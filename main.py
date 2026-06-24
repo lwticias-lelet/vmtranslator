@@ -1,47 +1,75 @@
+import os
 import sys
 
 from parser.parser import Parser
 from codewriter.codewriter import CodeWriter
 
 
+def get_output_file(input_path):
+
+    if os.path.isdir(input_path):
+
+        folder_name = os.path.basename(os.path.normpath(input_path))
+
+        return os.path.join(input_path, folder_name + ".asm")
+
+    return input_path.replace(".vm", ".asm")
+
+
+def get_vm_files(input_path):
+
+    if os.path.isdir(input_path):
+
+        files = []
+
+        for file in os.listdir(input_path):
+
+            if file.endswith(".vm"):
+
+                files.append(os.path.join(input_path, file))
+
+        return sorted(files)
+
+    return [input_path]
+
+
+def translate(input_path):
+
+    output_file = get_output_file(input_path)
+
+    vm_files = get_vm_files(input_path)
+
+    writer = CodeWriter(output_file)
+
+    for vm_file in vm_files:
+
+        file_name = os.path.basename(vm_file).replace(".vm", "")
+
+        writer.set_filename(file_name)
+
+        parser = Parser(vm_file)
+
+        while parser.has_more_commands():
+
+            parser.advance()
+
+    writer.close()
+
+    print("Arquivo gerado:", output_file)
+
+
 def main():
 
     if len(sys.argv) != 2:
 
-        print("Uso: python main.py arquivo.vm")
+        print("Uso:")
+        print("python main.py arquivo.vm")
+        print("python main.py pasta")
         return
 
-    input_file = sys.argv[1]
+    input_path = sys.argv[1]
 
-    output_file = input_file.replace(".vm", ".asm")
-
-    parser = Parser(input_file)
-    writer = CodeWriter(output_file)
-
-    while parser.has_more_commands():
-
-        parser.advance()
-
-        cmd_type = parser.command_type()
-
-        if cmd_type == "C_ARITHMETIC":
-            writer.write_arithmetic(parser.arg1())
-
-        elif cmd_type == "C_PUSH":
-            writer.write_push(
-                parser.arg1(),
-                parser.arg2()
-            )
-
-        elif cmd_type == "C_POP":
-            writer.write_pop(
-                parser.arg1(),
-                parser.arg2()
-            )
-
-    writer.close()
-
-    print(f"Arquivo gerado: {output_file}")
+    translate(input_path)
 
 
 if __name__ == "__main__":
