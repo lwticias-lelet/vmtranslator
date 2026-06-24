@@ -227,3 +227,99 @@ class CodeWriter:
 
         self.write_line(f"@{self.make_label(label)}")
         self.write_line("D;JNE")
+            def write_function(self, function_name, nlocals):
+
+        self.current_function = function_name
+
+        self.write_line(f"({function_name})")
+
+        for i in range(nlocals):
+
+            self.write_line("@0")
+            self.write_line("D=A")
+            self.push_d()
+
+    def write_call(self, function_name, nargs):
+
+        return_label = f"{function_name}$ret.{self.return_counter}"
+        self.return_counter += 1
+
+        self.write_line(f"@{return_label}")
+        self.write_line("D=A")
+        self.push_d()
+
+        for segment in ["LCL", "ARG", "THIS", "THAT"]:
+
+            self.write_line(f"@{segment}")
+            self.write_line("D=M")
+            self.push_d()
+
+        self.write_line("@SP")
+        self.write_line("D=M")
+        self.write_line(f"@{5 + nargs}")
+        self.write_line("D=D-A")
+        self.write_line("@ARG")
+        self.write_line("M=D")
+
+        self.write_line("@SP")
+        self.write_line("D=M")
+        self.write_line("@LCL")
+        self.write_line("M=D")
+
+        self.write_line(f"@{function_name}")
+        self.write_line("0;JMP")
+
+        self.write_line(f"({return_label})")
+
+    def write_return(self):
+
+        self.write_line("@LCL")
+        self.write_line("D=M")
+        self.write_line("@R13")
+        self.write_line("M=D")
+
+        self.write_line("@5")
+        self.write_line("A=D-A")
+        self.write_line("D=M")
+        self.write_line("@R14")
+        self.write_line("M=D")
+
+        self.write_line("@SP")
+        self.write_line("AM=M-1")
+        self.write_line("D=M")
+        self.write_line("@ARG")
+        self.write_line("A=M")
+        self.write_line("M=D")
+
+        self.write_line("@ARG")
+        self.write_line("D=M+1")
+        self.write_line("@SP")
+        self.write_line("M=D")
+
+        self.write_line("@R13")
+        self.write_line("AM=M-1")
+        self.write_line("D=M")
+        self.write_line("@THAT")
+        self.write_line("M=D")
+
+        self.write_line("@R13")
+        self.write_line("AM=M-1")
+        self.write_line("D=M")
+        self.write_line("@THIS")
+        self.write_line("M=D")
+
+        self.write_line("@R13")
+        self.write_line("AM=M-1")
+        self.write_line("D=M")
+        self.write_line("@ARG")
+        self.write_line("M=D")
+
+        self.write_line("@R13")
+        self.write_line("AM=M-1")
+        self.write_line("D=M")
+        self.write_line("@LCL")
+        self.write_line("M=D")
+
+        self.write_line("@R14")
+        self.write_line("A=M")
+        self.write_line("0;JMP")
