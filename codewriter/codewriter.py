@@ -44,3 +44,74 @@ class CodeWriter:
         self.write_line("M=D")
 
         self.write_call("Sys.init", 0)
+            def write_arithmetic(self, command):
+
+        if command == "add":
+            self.binary("M=M+D")
+
+        elif command == "sub":
+            self.binary("M=M-D")
+
+        elif command == "and":
+            self.binary("M=M&D")
+
+        elif command == "or":
+            self.binary("M=M|D")
+
+        elif command == "neg":
+            self.unary("M=-M")
+
+        elif command == "not":
+            self.unary("M=!M")
+
+        elif command == "eq":
+            self.compare("JEQ")
+
+        elif command == "gt":
+            self.compare("JGT")
+
+        elif command == "lt":
+            self.compare("JLT")
+
+    def unary(self, operation):
+
+        self.write_line("@SP")
+        self.write_line("A=M-1")
+        self.write_line(operation)
+
+    def binary(self, operation):
+
+        self.write_line("@SP")
+        self.write_line("AM=M-1")
+        self.write_line("D=M")
+        self.write_line("A=A-1")
+        self.write_line(operation)
+
+    def compare(self, jump):
+
+        true_label = f"TRUE_{self.label_counter}"
+        end_label = f"END_{self.label_counter}"
+
+        self.label_counter += 1
+
+        self.write_line("@SP")
+        self.write_line("AM=M-1")
+        self.write_line("D=M")
+        self.write_line("A=A-1")
+        self.write_line("D=M-D")
+        self.write_line(f"@{true_label}")
+        self.write_line(f"D;{jump}")
+
+        self.write_line("@SP")
+        self.write_line("A=M-1")
+        self.write_line("M=0")
+
+        self.write_line(f"@{end_label}")
+        self.write_line("0;JMP")
+
+        self.write_line(f"({true_label})")
+        self.write_line("@SP")
+        self.write_line("A=M-1")
+        self.write_line("M=-1")
+
+        self.write_line(f"({end_label})")
