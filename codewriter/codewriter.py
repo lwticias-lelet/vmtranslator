@@ -115,3 +115,91 @@ class CodeWriter:
         self.write_line("M=-1")
 
         self.write_line(f"({end_label})")
+            def write_push(self, segment, index):
+
+        if segment == "constant":
+
+            self.write_line(f"@{index}")
+            self.write_line("D=A")
+
+        elif segment in ["local", "argument", "this", "that"]:
+
+            base = {
+                "local": "LCL",
+                "argument": "ARG",
+                "this": "THIS",
+                "that": "THAT"
+            }[segment]
+
+            self.write_line(f"@{base}")
+            self.write_line("D=M")
+            self.write_line(f"@{index}")
+            self.write_line("A=D+A")
+            self.write_line("D=M")
+
+        elif segment == "temp":
+
+            self.write_line(f"@{5 + index}")
+            self.write_line("D=M")
+
+        elif segment == "pointer":
+
+            if index == 0:
+                self.write_line("@THIS")
+            else:
+                self.write_line("@THAT")
+
+            self.write_line("D=M")
+
+        elif segment == "static":
+
+            self.write_line(f"@{self.class_name}.{index}")
+            self.write_line("D=M")
+
+        self.push_d()
+
+    def write_pop(self, segment, index):
+
+        if segment in ["local", "argument", "this", "that"]:
+
+            base = {
+                "local": "LCL",
+                "argument": "ARG",
+                "this": "THIS",
+                "that": "THAT"
+            }[segment]
+
+            self.write_line(f"@{base}")
+            self.write_line("D=M")
+            self.write_line(f"@{index}")
+            self.write_line("D=D+A")
+
+        elif segment == "temp":
+
+            self.write_line(f"@{5 + index}")
+            self.write_line("D=A")
+
+        elif segment == "pointer":
+
+            if index == 0:
+                self.write_line("@THIS")
+            else:
+                self.write_line("@THAT")
+
+            self.write_line("D=A")
+
+        elif segment == "static":
+
+            self.write_line(f"@{self.class_name}.{index}")
+            self.write_line("D=A")
+
+        self.write_line("@R13")
+        self.write_line("M=D")
+
+        self.write_line("@SP")
+        self.write_line("AM=M-1")
+        self.write_line("D=M")
+
+        self.write_line("@R13")
+        self.write_line("A=M")
+        self.write_line("M=D")
