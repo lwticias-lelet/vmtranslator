@@ -52,3 +52,24 @@ class Parser:
             return "C_RETURN"
 
         return "C_ARITHMETIC"
+        def arg1(self):
+
+        if self.command_type() == "C_RETURN":
+            return None
+
+        if self.command_type() == "C_ARITHMETIC":
+            return self.current_command.split()[0]
+
+        return self.current_command.split()[1]
+
+    def arg2(self):
+
+        if self.command_type() in [
+            "C_PUSH",
+            "C_POP",
+            "C_FUNCTION",
+            "C_CALL"
+        ]:
+            return int(self.current_command.split()[2])
+
+        return None
