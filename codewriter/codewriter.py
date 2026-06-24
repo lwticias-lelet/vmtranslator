@@ -203,3 +203,27 @@ class CodeWriter:
         self.write_line("@R13")
         self.write_line("A=M")
         self.write_line("M=D")
+            def make_label(self, label):
+
+        if self.current_function:
+            return f"{self.current_function}${label}"
+
+        return label
+
+    def write_label(self, label):
+
+        self.write_line(f"({self.make_label(label)})")
+
+    def write_goto(self, label):
+
+        self.write_line(f"@{self.make_label(label)}")
+        self.write_line("0;JMP")
+
+    def write_if(self, label):
+
+        self.write_line("@SP")
+        self.write_line("AM=M-1")
+        self.write_line("D=M")
+
+        self.write_line(f"@{self.make_label(label)}")
+        self.write_line("D;JNE")
