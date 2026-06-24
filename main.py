@@ -74,3 +74,22 @@ def main():
 
 if __name__ == "__main__":
     main()
+                cmd_type = parser.command_type()
+
+            if cmd_type == "C_ARITHMETIC":
+
+                writer.write_arithmetic(parser.arg1())
+
+            elif cmd_type == "C_PUSH":
+
+                writer.write_push(
+                    parser.arg1(),
+                    parser.arg2()
+                )
+
+            elif cmd_type == "C_POP":
+
+                writer.write_pop(
+                    parser.arg1(),
+                    parser.arg2()
+                )
