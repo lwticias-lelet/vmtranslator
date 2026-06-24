@@ -17,13 +17,15 @@ class Parser:
         self.current_command = None
 
     def has_more_commands(self):
+
         return self.index < len(self.commands)
 
     def advance(self):
 
         self.current_command = self.commands[self.index]
         self.index += 1
-            def command_type(self):
+
+    def command_type(self):
 
         cmd = self.current_command.split()[0]
 
@@ -52,7 +54,8 @@ class Parser:
             return "C_RETURN"
 
         return "C_ARITHMETIC"
-        def arg1(self):
+
+    def arg1(self):
 
         if self.command_type() == "C_RETURN":
             return None
@@ -64,12 +67,7 @@ class Parser:
 
     def arg2(self):
 
-        if self.command_type() in [
-            "C_PUSH",
-            "C_POP",
-            "C_FUNCTION",
-            "C_CALL"
-        ]:
+        if self.command_type() in ["C_PUSH", "C_POP", "C_FUNCTION", "C_CALL"]:
             return int(self.current_command.split()[2])
 
         return None
