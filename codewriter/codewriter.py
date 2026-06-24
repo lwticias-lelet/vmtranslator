@@ -38,16 +38,9 @@ class CodeWriter:
 
     def write_bootstrap(self):
 
-        # inicia a pilha em 256
-
         self.write_line("@256")
         self.write_line("D=A")
         self.write_line("@SP")
         self.write_line("M=D")
 
-        # chama Sys.init
-
         self.write_call("Sys.init", 0)
-
-    def write_call(self, function_name, nargs):
-        pass
