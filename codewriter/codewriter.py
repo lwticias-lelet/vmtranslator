@@ -38,13 +38,18 @@ class CodeWriter:
 
     def write_bootstrap(self):
 
+        # inicia a pilha em 256
+
         self.write_line("@256")
         self.write_line("D=A")
         self.write_line("@SP")
         self.write_line("M=D")
 
+        # chama Sys.init
+
         self.write_call("Sys.init", 0)
-            def write_arithmetic(self, command):
+
+    def write_arithmetic(self, command):
 
         if command == "add":
             self.binary("M=M+D")
@@ -115,7 +120,8 @@ class CodeWriter:
         self.write_line("M=-1")
 
         self.write_line(f"({end_label})")
-            def write_push(self, segment, index):
+
+    def write_push(self, segment, index):
 
         if segment == "constant":
 
@@ -203,7 +209,8 @@ class CodeWriter:
         self.write_line("@R13")
         self.write_line("A=M")
         self.write_line("M=D")
-            def make_label(self, label):
+
+    def make_label(self, label):
 
         if self.current_function:
             return f"{self.current_function}${label}"
@@ -227,7 +234,8 @@ class CodeWriter:
 
         self.write_line(f"@{self.make_label(label)}")
         self.write_line("D;JNE")
-            def write_function(self, function_name, nlocals):
+
+    def write_function(self, function_name, nlocals):
 
         self.current_function = function_name
 
@@ -244,15 +252,21 @@ class CodeWriter:
         return_label = f"{function_name}$ret.{self.return_counter}"
         self.return_counter += 1
 
+        # endereco de retorno
+
         self.write_line(f"@{return_label}")
         self.write_line("D=A")
         self.push_d()
+
+        # salva os segmentos
 
         for segment in ["LCL", "ARG", "THIS", "THAT"]:
 
             self.write_line(f"@{segment}")
             self.write_line("D=M")
             self.push_d()
+
+        # ARG = SP - 5 - nargs
 
         self.write_line("@SP")
         self.write_line("D=M")
@@ -261,28 +275,40 @@ class CodeWriter:
         self.write_line("@ARG")
         self.write_line("M=D")
 
+        # LCL = SP
+
         self.write_line("@SP")
         self.write_line("D=M")
         self.write_line("@LCL")
         self.write_line("M=D")
 
+        # vai para a funcao
+
         self.write_line(f"@{function_name}")
         self.write_line("0;JMP")
+
+        # label de retorno
 
         self.write_line(f"({return_label})")
 
     def write_return(self):
+
+        # FRAME = LCL
 
         self.write_line("@LCL")
         self.write_line("D=M")
         self.write_line("@R13")
         self.write_line("M=D")
 
+        # RET = *(FRAME - 5)
+
         self.write_line("@5")
         self.write_line("A=D-A")
         self.write_line("D=M")
         self.write_line("@R14")
         self.write_line("M=D")
+
+        # *ARG = pop()
 
         self.write_line("@SP")
         self.write_line("AM=M-1")
@@ -291,10 +317,14 @@ class CodeWriter:
         self.write_line("A=M")
         self.write_line("M=D")
 
+        # SP = ARG + 1
+
         self.write_line("@ARG")
         self.write_line("D=M+1")
         self.write_line("@SP")
         self.write_line("M=D")
+
+        # THAT = *(FRAME - 1)
 
         self.write_line("@R13")
         self.write_line("AM=M-1")
@@ -302,11 +332,15 @@ class CodeWriter:
         self.write_line("@THAT")
         self.write_line("M=D")
 
+        # THIS = *(FRAME - 2)
+
         self.write_line("@R13")
         self.write_line("AM=M-1")
         self.write_line("D=M")
         self.write_line("@THIS")
         self.write_line("M=D")
+
+        # ARG = *(FRAME - 3)
 
         self.write_line("@R13")
         self.write_line("AM=M-1")
@@ -314,11 +348,15 @@ class CodeWriter:
         self.write_line("@ARG")
         self.write_line("M=D")
 
+        # LCL = *(FRAME - 4)
+
         self.write_line("@R13")
         self.write_line("AM=M-1")
         self.write_line("D=M")
         self.write_line("@LCL")
         self.write_line("M=D")
+
+        # volta para o retorno
 
         self.write_line("@R14")
         self.write_line("A=M")
