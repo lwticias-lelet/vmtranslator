@@ -35,7 +35,6 @@ def get_vm_files(input_path):
 
 def need_bootstrap(input_path):
 
-    # no project 8, quando tem Sys.vm precisa iniciar com bootstrap
 
     if os.path.isdir(input_path):
 
